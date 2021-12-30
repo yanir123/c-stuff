@@ -7,23 +7,18 @@
 #include <time.h>
 
 #define K 3
-#define HEIGHT 5
-#define WIDTH 5
+#define HEIGHT 3
+#define WIDTH 3
 
 int main(int argc, char** argv, char** env) {
     double element[WIDTH] = {1, 2, 3, 4, 5};
-    double neighbors_fixed[HEIGHT][WIDTH] = {{2, 3, 4, 5, 6},
-                              {100, 200, 300, 400, 500},
-                              {50, 60, 70, 80, 90},
-                              {3, 4, 5, 6, 7},
-                              {4, 5, 6, 7, 8}};
 
     double** neighbors = malloc(sizeof(double*) * HEIGHT);
     
     for (int i = 0; i < HEIGHT; i++) {
         neighbors[i] = malloc(sizeof(double) * WIDTH);
         for (int j = 0; j < WIDTH; j++) {
-            neighbors[i][j] = neighbors_fixed[i][j];
+            neighbors[i][j] = (rand() % (100 - 0 + 1)) + 0;
         }
     }
 

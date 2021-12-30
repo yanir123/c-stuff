@@ -1,11 +1,8 @@
 /*
 @author Yanir Harel
 */
-
-#include <stdlib.h>
-#include <stdint.h>
-#include <math.h>
-#include <omp.h>
+#pragma once
+#include "../utils/utils.h"
 
 /*
 Function to get the k neighbors with the smallest distances.
@@ -17,7 +14,4 @@ Function to get the k neighbors with the smallest distances.
     @return array of size k of the closest neighbors (size of (k, width))(needs to be free)
 
 */
-double** knn_fit_predict(double* element, double** neighbors, uint16_t height, uint16_t width, uint16_t k);
-void quickSort(double values[], uint16_t arr[], int low, int high);
-int partition (double values[], uint16_t arr[], int low, int high);
-void swap(uint16_t* a, uint16_t* b);
+double** knn_fit_predict(double* element, double** neighbors, uint32_t height, uint32_t width, uint16_t k);
