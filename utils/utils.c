@@ -41,6 +41,7 @@ array* dot_product(array first, array second) {
     output->width = second.width;
     output->values = malloc(sizeof(double**) * first.height);
     
+    #pragma omp parallel for
     for (uint32_t i = 0; i < first.height; i++) {
         output->values[i] = malloc(sizeof(double) * second.width);
         for (uint32_t j = 0; j < second.width; j++) {
@@ -53,4 +54,122 @@ array* dot_product(array first, array second) {
     }
 
     return output;
+}
+
+array* random_array(uint32_t height, uint32_t width, double max_rand, double min_rand) {
+    array* arr = zero_array(height, width);
+
+    #pragma omp parallel for
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            arr->values[i][j] = random_double(max_rand, min_rand);
+        }
+    }
+
+    return arr;
+}
+
+array* zero_array(uint32_t height, uint32_t width) {
+    array* arr = malloc(sizeof(array));
+    arr->height = height;
+    arr->width = width;
+    arr->values = malloc(sizeof(double*) * height);
+
+    #pragma omp parallel for
+    for (int i = 0; i < height; i++) {
+        arr->values[i] = calloc(width, sizeof(double));
+    }
+
+    return arr;
+}
+
+void free_array(array* arr) {
+
+    #pragma omp parallel for
+    for (int i = 0; i < arr->height; i++) {
+        free(arr->values[i]);
+    }
+    
+    free(arr->values);
+    free(arr);
+}
+
+double random_double(double max, double min) {
+    return (double)rand() / RAND_MAX * max + min;
+}
+
+int array_agg_other(array const* first, array const* second, double (*f)(double, double)) {
+    if ((second->height != 1 && (second->height != first->height || second->width != first->width)) || 
+        (second->height == 1 && second->width != first->height)) {
+        return 0;
+    }
+
+    if (second->height == 1) {
+        #pragma omp parallel for
+        for (int i = 0; i < second->width; i++) {
+            for (int j = 0; j < first->width; j++) {
+                first->values[i][j] = f(first->values[i][j], second->values[0][i]);
+            }
+        }
+    } else {
+        #pragma omp parallel for
+        for (int i = 0; i < first->height; i++) {
+            for (int j = 0; j < first->width; j++) {
+                first->values[i][j] = f(first->values[i][j], second->values[i][j]);
+            }
+        }
+    }
+
+    return 1;
+}
+
+double sub(double first, double second) {
+    return first - second;
+}
+
+double add(double first, double second) {
+    return first - second;
+}
+
+double mul(double first, double second) {
+    return first * second;
+}
+
+double divide(double first, double second) {
+    return first / second;
+}
+
+double power(double first, double second) {
+    return pow(first, second);
+}
+
+int array_sub(array const* first, array const* second) {
+    return array_agg_other(first, second, sub);
+}
+
+int array_add(array const* first, array const* second) {
+    return array_agg_other(first, second, add);
+}
+
+int array_mul(array const* first, array const* second) {
+    return array_agg_other(first, second, mul);
+}
+
+int array_div(array const* first, array const* second) {
+    return array_agg_other(first, second, divide);
+}
+
+int array_pow(array const* first, array const* second) {
+    return array_agg_other(first, second, power);
+}
+
+void array_print(array* arr) {
+    for (int i = 0; i < arr->height; i++) {
+        printf("{ ");
+        for (int j = 0; j < arr->width; j++) {
+            printf("%f ", arr->values[i][j]);
+        }
+        printf("}\n");
+    }
+    printf("\n");
 }

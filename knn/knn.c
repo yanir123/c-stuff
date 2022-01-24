@@ -13,7 +13,7 @@ double** knn_fit_predict(double* element, double** neighbors, uint32_t height, u
     uint32_t* nearest_neighbors_indexes = malloc(height * sizeof(uint32_t));
     double** k_nearest_neighbors = malloc(k * sizeof(double*));
     
-    #pragma omp parallel
+    #pragma omp parallel for
 
     for (int i = 0; i < height; i++) {
         double l2_distance = 0;
