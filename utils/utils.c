@@ -123,12 +123,30 @@ int array_agg_other(array const* first, array const* second, double (*f)(double,
     return 1;
 }
 
+void array_agg_self(array const* first, double (*f)(double)) {
+    #pragma omp parallel for
+    for (int i = 0; i < first->height; i++) {
+        for (int j = 0; j < first->width; j++) {
+            first->values[i][j] = f(first->values[i][j]);
+        }
+    }
+}
+
+void array_agg_rvalue(array const* first, double second, double (*f)(double, double)) {
+    #pragma omp parallel for
+    for (int i = 0; i < first->height; i++) {
+        for (int j = 0; j < first->width; j++) {
+            first->values[i][j] = f(first->values[i][j], second);
+        }
+    }
+}
+
 double sub(double first, double second) {
     return first - second;
 }
 
 double add(double first, double second) {
-    return first - second;
+    return first + second;
 }
 
 double mul(double first, double second) {
@@ -141,6 +159,18 @@ double divide(double first, double second) {
 
 double power(double first, double second) {
     return pow(first, second);
+}
+
+double exponent(double first) {
+    return exp(first);
+}
+
+double square_root(double first) {
+    return sqrt(first);
+}
+
+double logarithm(double first) {
+    return log(first);
 }
 
 int array_sub(array const* first, array const* second) {
@@ -163,6 +193,26 @@ int array_pow(array const* first, array const* second) {
     return array_agg_other(first, second, power);
 }
 
+void array_pow_single(array const* first, double second) {
+    array_agg_rvalue(first, second, power);
+}
+
+void array_sub_single(array const* first, double second) {
+    array_agg_rvalue(first, second, sub);
+}
+
+void array_add_single(array const* first, double second) {
+    array_agg_rvalue(first, second, add);
+}
+
+void array_mul_single(array const* first, double second) {
+    array_agg_rvalue(first, second, mul);
+}
+
+void array_div_single(array const* first, double second) {
+    array_agg_rvalue(first, second, divide);
+}
+
 void array_print(array* arr) {
     for (int i = 0; i < arr->height; i++) {
         printf("{ ");
@@ -172,4 +222,16 @@ void array_print(array* arr) {
         printf("}\n");
     }
     printf("\n");
+}
+
+void array_sqrt(array const* first) {
+    array_agg_self(first, square_root);
+}
+
+void array_exp(array const* first) {
+    array_agg_self(first, exponent);
+}
+
+void array_log(array const* first) {
+    array_agg_self(first, logarithm);
 }
