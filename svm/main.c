@@ -9,11 +9,13 @@ int main(int argc, char** argv, char** env) {
     array_print(first);
     // array_print(second);
 
-    array_exp(first);
+    array* exp_first = array_exp(first);
 
+    array_print(exp_first);
     array_print(first);
 
     free_array(first);
+    free_array(exp_first);
     // free_array(second);
 
     return 0;

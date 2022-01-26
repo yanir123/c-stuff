@@ -35,19 +35,19 @@ void quickSort(double values[], uint32_t arr[], int low, int high)
     } 
 } 
 
-array* dot_product(array first, array second) {
+array* dot_product(array const* first, array const* second) {
     array* output = malloc(sizeof(array));
-    output->height = first.height;
-    output->width = second.width;
-    output->values = malloc(sizeof(double**) * first.height);
+    output->height = first->height;
+    output->width = second->width;
+    output->values = malloc(sizeof(double**) * first->height);
     
     #pragma omp parallel for
-    for (uint32_t i = 0; i < first.height; i++) {
-        output->values[i] = malloc(sizeof(double) * second.width);
-        for (uint32_t j = 0; j < second.width; j++) {
+    for (uint32_t i = 0; i < first->height; i++) {
+        output->values[i] = malloc(sizeof(double) * second->width);
+        for (uint32_t j = 0; j < second->width; j++) {
             double sum = 0;
-            for (uint32_t k = 0; k < first.width; k++) { // First width or second height
-                sum += first.values[i][k] * second.values[k][j];
+            for (uint32_t k = 0; k < first->width; k++) { // First width or second height
+                sum += first->values[i][k] * second->values[k][j];
             }
             output->values[i][j] = sum;
         }
@@ -98,47 +98,57 @@ double random_double(double max, double min) {
     return (double)rand() / RAND_MAX * max + min;
 }
 
-int array_agg_other(array const* first, array const* second, double (*f)(double, double)) {
+array* array_agg_other(array const* first, array const* second, double (*f)(double, double)) {
     if ((second->height != 1 && (second->height != first->height || second->width != first->width)) || 
         (second->height == 1 && second->width != first->height)) {
-        return 0;
+        return NULL;
     }
+
+    array* arr = zero_array(first->height, first->width);
 
     if (second->height == 1) {
         #pragma omp parallel for
         for (int i = 0; i < second->width; i++) {
             for (int j = 0; j < first->width; j++) {
-                first->values[i][j] = f(first->values[i][j], second->values[0][i]);
+                arr->values[i][j] = f(first->values[i][j], second->values[0][i]);
             }
         }
     } else {
         #pragma omp parallel for
         for (int i = 0; i < first->height; i++) {
             for (int j = 0; j < first->width; j++) {
-                first->values[i][j] = f(first->values[i][j], second->values[i][j]);
+                arr->values[i][j] = f(first->values[i][j], second->values[i][j]);
             }
         }
     }
 
-    return 1;
+    return arr;
 }
 
-void array_agg_self(array const* first, double (*f)(double)) {
+array* array_agg_self(array const* first, double (*f)(double)) {
+    array* arr = zero_array(first->height, first->width);
+
     #pragma omp parallel for
     for (int i = 0; i < first->height; i++) {
         for (int j = 0; j < first->width; j++) {
-            first->values[i][j] = f(first->values[i][j]);
+            arr->values[i][j] = f(first->values[i][j]);
         }
     }
+
+    return arr;
 }
 
-void array_agg_rvalue(array const* first, double second, double (*f)(double, double)) {
+array* array_agg_rvalue(array const* first, double second, double (*f)(double, double)) {
+    array* arr = zero_array(first->height, first->width);
+
     #pragma omp parallel for
     for (int i = 0; i < first->height; i++) {
         for (int j = 0; j < first->width; j++) {
-            first->values[i][j] = f(first->values[i][j], second);
+            arr->values[i][j] = f(first->values[i][j], second);
         }
     }
+
+    return arr;
 }
 
 double sub(double first, double second) {
@@ -173,44 +183,44 @@ double logarithm(double first) {
     return log(first);
 }
 
-int array_sub(array const* first, array const* second) {
+array* array_sub(array const* first, array const* second) {
     return array_agg_other(first, second, sub);
 }
 
-int array_add(array const* first, array const* second) {
+array* array_add(array const* first, array const* second) {
     return array_agg_other(first, second, add);
 }
 
-int array_mul(array const* first, array const* second) {
+array* array_mul(array const* first, array const* second) {
     return array_agg_other(first, second, mul);
 }
 
-int array_div(array const* first, array const* second) {
+array* array_div(array const* first, array const* second) {
     return array_agg_other(first, second, divide);
 }
 
-int array_pow(array const* first, array const* second) {
+array* array_pow(array const* first, array const* second) {
     return array_agg_other(first, second, power);
 }
 
-void array_pow_single(array const* first, double second) {
-    array_agg_rvalue(first, second, power);
+array* array_pow_single(array const* first, double second) {
+    return array_agg_rvalue(first, second, power);
 }
 
-void array_sub_single(array const* first, double second) {
-    array_agg_rvalue(first, second, sub);
+array* array_sub_single(array const* first, double second) {
+    return array_agg_rvalue(first, second, sub);
 }
 
-void array_add_single(array const* first, double second) {
-    array_agg_rvalue(first, second, add);
+array* array_add_single(array const* first, double second) {
+    return array_agg_rvalue(first, second, add);
 }
 
-void array_mul_single(array const* first, double second) {
-    array_agg_rvalue(first, second, mul);
+array* array_mul_single(array const* first, double second) {
+    return array_agg_rvalue(first, second, mul);
 }
 
-void array_div_single(array const* first, double second) {
-    array_agg_rvalue(first, second, divide);
+array* array_div_single(array const* first, double second) {
+    return array_agg_rvalue(first, second, divide);
 }
 
 void array_print(array* arr) {
@@ -224,14 +234,14 @@ void array_print(array* arr) {
     printf("\n");
 }
 
-void array_sqrt(array const* first) {
-    array_agg_self(first, square_root);
+array* array_sqrt(array const* first) {
+    return array_agg_self(first, square_root);
 }
 
-void array_exp(array const* first) {
-    array_agg_self(first, exponent);
+array* array_exp(array const* first) {
+    return array_agg_self(first, exponent);
 }
 
-void array_log(array const* first) {
-    array_agg_self(first, logarithm);
+array* array_log(array const* first) {
+    return array_agg_self(first, logarithm);
 }
