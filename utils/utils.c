@@ -245,3 +245,118 @@ array* array_exp(array const* first) {
 array* array_log(array const* first) {
     return array_agg_self(first, logarithm);
 }
+
+array* array_part(array const* first, uint32_t start, uint32_t end, uint8_t dim) {
+    array* arr;
+    
+    if (start > end || dim < 0 || first == NULL || start < 0 || end < 0) {
+        return NULL;
+    } else if (dim == 0) {
+        arr = zero_array(end - start, first->width);
+
+        #pragma omp parallel for
+        for (int i = start; i < end; i++) {
+            for (int j = 0; j < first->width; j++) {
+                arr->values[i][j] = first->values[i][j];
+            }
+        }
+    } else if (dim == 1) {
+        arr = zero_array(first->height, end - start);
+        
+        #pragma omp parallel for
+        for (int i = 0; i < first->height; i++) {
+            for (int j = start; j < end; j++) {
+                arr->values[i][j] = first->values[i][j];
+            }
+        }
+    }
+    return arr;
+}
+
+array* array_argmax(array const* first, uint8_t dim) {
+    array* arr = NULL;
+
+    if (dim == 0) {
+        arr = zero_array(1, first->height);
+
+        #pragma omp parallel for
+        for (int i = 0; i < first->height; i++) {
+            double max_value = 0;
+            uint32_t max_index = 0;
+            for (int j = 0; j < first->width; j++) {
+                if (first->values[i][j] > max_value) {
+                    max_index = j;
+                    max_value = first->values[i][j];
+                }
+            }
+
+            arr->values[0][i] = (double)max_index;
+        }
+    } else if (dim == 1) {
+        arr = zero_array(1, first->height);
+
+        #pragma omp parallel for
+        for (int i = 0; i < first->width; i++) {
+            double max_value = 0;
+            uint32_t max_index = 0;
+            for (int j = 0; j < first->height; j++) {
+                if (first->values[i][j] > max_value) {
+                    max_index = j;
+                    max_value = first->values[i][j];
+                }
+            }
+
+            arr->values[0][i] = (double)max_index;
+        }
+    }
+
+    return arr;
+}
+
+array* array_transpose(array const* first) {
+    array* arr = zero_array(first->width, first->height);
+
+    #pragma omp parallel for
+    for (int i = 0; i < first->width; i++) {
+        for (int j = 0; j < first->height; j++) {
+            arr->values[i][j] = first->values[i][j];
+        }
+    }
+
+    return arr;
+}
+
+array* range_array(uint32_t number) {
+    array* arr = zero_array(1, number);
+
+    #pragma omp parallel for
+    for (int i = 0; i < number; i++) {
+        arr->values[0][i] = i;
+    }
+
+    return arr;
+}
+
+array* array_at(array const* first, array const* second, uint8_t dim) {
+    if (second->height != 1) {
+        return NULL;
+    }
+
+    array* arr = zero_array(1, second->width);
+
+    if (dim == 0) {
+
+        #pragma omp parallel for
+        for (int i = 0; i < second->width; i++) {
+            arr->values[i][0] = first->values[(uint64_t)second->values[0][i]][0];
+        }
+    } else if (dim == 1) {
+
+        #pragma omp parallel for
+        for (int i = 0; i < second->height; i++) {
+            arr->values[i][0] = first->values[0][(uint64_t)second->values[0][i]];
+        }
+    }
+
+    return arr;
+}
