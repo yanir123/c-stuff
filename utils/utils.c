@@ -360,3 +360,47 @@ array* array_at(array const* first, array const* second, uint8_t dim) {
 
     return arr;
 }
+
+array* array_maximum(array const* first, double number) {
+    array* arr = zero_array(first->height, first->width);
+
+    #pragma omp parallel for
+    for(int i = 0; i < first->height; i++) {
+        for (int j = 0; j < first->width; j++) {
+            arr->values[i][j] = first->values[i][j] > number ? first->values[i][j] : number; 
+        }
+    }
+
+    return arr;
+}
+
+int array_set(array const* first, array const* second, double value) {
+    if (second->height != 1) {
+        return 0;
+    }
+
+    if (second->height == 1) {
+        
+        #pragma omp parallel for
+        for (int i = 0; i < second->width; i++) {
+            for (int j = 0; j < first->width; j++) {
+                first->values[(uint64_t)second->values[0][i]][j] = value;
+            }
+        }
+    }
+
+    return 1;
+}
+
+double array_sum(array const* first) {
+    double sum = 0;
+
+    #pragma omp parallel for
+    for (int i = 0; i < first->height; i++) {
+        for (int j = 0; j < first->width; j++) {
+            sum += first->values[i][j];
+        }
+    }
+
+    return sum;
+}

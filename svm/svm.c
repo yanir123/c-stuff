@@ -39,11 +39,11 @@ array* svm_loss(array* weights, array* features, array* labels, double regulariz
     array* diff_with_delta = array_add_single(diff, delta);
     free_array(diff);
     
-    array* margins = array_maximum(0, diff_with_delta); // TODO: Implement array_maximum
-    array_set(margins, labels, 0); // TODO: Implement array_set
+    array* margins = array_maximum(diff_with_delta, 0);
+    array_set(margins, labels, 0); 
     free_array(diff_with_delta);
 
-    double loss = array_sum(margins); // TODO: implement array_sum
+    double loss = array_sum(margins);
 
     array* weights_t = array_transpose(weights);
     array* descent = dot_product(weights_t, weights);
