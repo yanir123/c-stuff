@@ -282,41 +282,66 @@ array* array_div_single(array const* first, double second);
 array* array_pow_single(array const* first, double second);
 
 /*
-
+    Function to extract a part of an array
+    @param first array const* - array to partition
+    @param start uint32_t - index to the start of the partition
+    @param end uint32_t - index to the end of the partition
+    @param dim uint8_t - indecation of the partition orientation - vertical/horizontal (0/1)
+    @return A new array containing the partition
 */
 array* array_part(array const* first, uint32_t start, uint32_t end, uint8_t dim);
 
 /*
-
+    Function to find the index of the maximum value in given array
+    @param first array const* - array to find max in
+    @param dim uint8_t - indecation of the max search orientation - vertical/horizontal (0/1)
+    @return A new array containing the indexes of the maximum values
 */
 array* array_argmax(array const* first, uint8_t dim);
 
 /*
-
+    Function to print an array
+    @param arr array* - array to print
+    @return None
 */
 void array_print(array* arr);
 
 /*
-
+    Function to transpose an array ie. rotate the shape
+    @param first array const* - array to transpose
+    @return A new array representing the transposed array
 */
 array* array_transpose(array const* first);
 
 /*
-
+    Function to select an index from the array
+    @param first array const* - array to select from
+    @param second array const* - array containing the indexes
+    @param dim uint8_t - indecation of the selection orientation - vertical/horizontal (0/1)
+    @return A new array containing the selected values
 */
 array* array_at(array const* first, array const* second, uint8_t dim);
 
 /*
-
+    Function to aggregate maximum ie. max(value, number) on the array
+    @param first array const* - array to aggregate over
+    @param number double - operand for the max function
+    @return A new array containing the aggregation result
 */
 array* array_maximum(array const* first, double number);
 
 /*
-
+    Function to set values in given array
+    @param first array const* - array to set values at
+    @param second array const* - array conotaining indexes to put at
+    @param value double - value to set at indexes
+    @return 1 if success 0 if failure
 */
 int array_set(array const* first, array const* second, double value);
 
 /*
-
+    Function to sum all the values of an array
+    @param first array const* - array to sum
+    @return the sum of all the values in the array
 */
 double array_sum(array const* first);
