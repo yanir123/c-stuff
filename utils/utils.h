@@ -337,7 +337,7 @@ array* array_maximum(array const* first, double number);
     @param value double - value to set at indexes
     @return 1 if success 0 if failure
 */
-int array_set(array const* first, array const* second, double value);
+void array_set(array const* first, array const* second, double value);
 
 /*
     Function to sum all the values of an array

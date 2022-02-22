@@ -31,11 +31,8 @@ array* svm_loss(array* weights, array* features, array* labels, double regulariz
     double delta = 1.0;
 
     array* scores = dot_product(features, weights);
-
-    array* correct_classes = array_at(scores, labels);
-
+    array* correct_classes = array_at(scores, labels, 1);
     array* diff = array_sub(scores, correct_classes);
-
     array* diff_with_delta = array_add_single(diff, delta);
     free_array(diff);
     
@@ -51,9 +48,29 @@ array* svm_loss(array* weights, array* features, array* labels, double regulariz
     free_array(weights_t);
     free_array(descent);
 
-    // TODO: Implement grandient calculation
+    array* mask = zero_array(margins->height, margins->width); 
+    array* indexes = array_gt(mask, 0); //TODO: implement array_gt
+    array_set(mask, indexes, 1);
 
+    double count = array_sum(mask);
+    array_set(mask, labels, -count);
+
+    array* features_t = array_transpose(features);
+
+    array* dw = dot_product(features_t, mask);
+    array* dw_normalized = array_div_single(dw, mask->height);
+    array* weights_reg = array_mul_single(weights, regularization);
+    array* dw_reg = array_add(dw_normalized, weights_reg);
+
+    free_array(dw_normalized);
+    free_array(dw);
+    free_array(weights_reg);
+    free_array(features_t);
+    free_array(indexes);
+    free_array(mask);
     free_array(margins);
     free_array(scores);
     free_array(correct_classes);
+
+    return dw_reg;
 }

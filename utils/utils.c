@@ -374,22 +374,25 @@ array* array_maximum(array const* first, double number) {
     return arr;
 }
 
-int array_set(array const* first, array const* second, double value) {
+void array_set(array const* first, array const* second, double value) {
     if (second->height != 1) {
-        return 0;
-    }
-
-    if (second->height == 1) {
+        
+        #pragma omp parallel for
+        for (int i = 0; i < second->height; i++) {
+            double* index = second->values[i];
+            for (int j = 0; j < second->width; j++) {
+                first->values[(uint64_t)index[0]][(uint64_t)index[j]] = value;
+            }
+        }
+    } else if (second->height == 1) {
         
         #pragma omp parallel for
         for (int i = 0; i < second->width; i++) {
-            for (int j = 0; j < first->width; j++) {
-                first->values[(uint64_t)second->values[0][i]][j] = value;
+            for (int j = 0; j < first->height; j++) {
+                first->values[j][(uint64_t)second->values[0][i]] = value;
             }
         }
     }
-
-    return 1;
 }
 
 double array_sum(array const* first) {
