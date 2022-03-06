@@ -379,9 +379,10 @@ void array_set(array const* first, array const* second, double value) {
         
         #pragma omp parallel for
         for (int i = 0; i < second->height; i++) {
-            double* index = second->values[i];
             for (int j = 0; j < second->width; j++) {
-                first->values[(uint64_t)index[0]][(uint64_t)index[j]] = value;
+                if (second->values[i][j]) {
+                    first->values[i][j] = value;
+                }
             }
         }
     } else if (second->height == 1) {
@@ -406,4 +407,17 @@ double array_sum(array const* first) {
     }
 
     return sum;
+}
+
+array* array_gt(array const* first, double value) {
+    array* arr = zero_array(first->height, first->width);
+
+    #pragma omp parallel for
+    for (int i = 0; i < arr->height; i++) {
+        for (int j = 0; j < arr->width; j++) {
+            arr->values[i][j] = first->values[i][j] > value;
+        }
+    }
+
+    return arr;
 }

@@ -300,6 +300,14 @@ array* array_part(array const* first, uint32_t start, uint32_t end, uint8_t dim)
 array* array_argmax(array const* first, uint8_t dim);
 
 /*
+    Function to return a new array with values that match the greater than filter
+    @param first array const* - array to filter
+    @param value douvle - value to filter by
+    @return new filtered array
+*/
+array* array_gt(array const* first, double value);
+
+/*
     Function to print an array
     @param arr array* - array to print
     @return None
