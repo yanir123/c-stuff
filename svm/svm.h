@@ -1,3 +1,4 @@
+#pragma once
 #include "../utils/utils.h"
 
 struct svm_classifier {
